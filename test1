@@ -1,0 +1,8 @@
+frase=input("ingrese una frase: ")
+lista=frase.split(' ')
+frase=''.join(lista)
+finvertida=frase[::-1]
+if frase==finvertida:
+  print("La frase es capicua.") 
+else:
+  print("La frase no es capicua.")
