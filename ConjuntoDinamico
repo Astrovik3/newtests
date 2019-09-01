@@ -1,0 +1,37 @@
+public class ConjuntoEstatico implements ConjuntoTDA {
+	String [] array;
+    int cant;
+	public void inicializar() {
+		array = new String [100];
+        cant = 0;
+	}
+	public boolean conjuntoVacio() {
+		return (cant == 0);
+	}
+	public void agregar(String valor) {
+		if (!this.pertenece(valor)){
+            array[cant] = valor;
+            cant++;
+        }
+	}
+	public String elegir() {
+		return array[cant - 1];
+	}
+	public void sacar(String valor) {
+		int i = 0;
+        while(i < cant && !array[i].equalsIgnoreCase(valor)) {
+            i++;
+        }
+        if(i < cant){
+            array[i] = array[cant - 1];
+            cant--;
+        }
+	}
+	public boolean pertenece(String valor) {
+		int i = 0;
+        while(i < cant && !array[i].equalsIgnoreCase(valor)) {
+        	i++;
+        }
+        return (i < cant);
+	}
+}
