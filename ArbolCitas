@@ -1,0 +1,92 @@
+public class ArbolCitas implements ArbolCitasTDA{
+	private NodoArbol raiz;
+	
+	public void inicializar(){
+		raiz = null;
+	}
+	public void agregar(String hora, String cliente){
+		if(raiz == null){
+			raiz = new NodoArbol();
+			raiz.cliente = cliente;
+			raiz.hora = hora;
+			raiz.hijoDer = new ArbolCitas();
+			raiz.hijoIzq = new ArbolCitas();
+			raiz.hijoDer.inicializar();
+			raiz.hijoIzq.inicializar();
+		}
+		else{
+			if(hora.compareTo(raiz.hora) < 0){
+				raiz.hijoIzq.agregar(hora, cliente);
+			}
+			else{
+				raiz.hijoDer.agregar(hora, cliente);
+			}
+		}
+	}
+	public void eliminar(String hora, String cliente){
+		if(raiz != null){
+			if(raiz.hora.equals(hora) && raiz.cliente.equals(cliente)){
+				if(!raiz.hijoDer.arbolVacio()){
+					NodoArbol menorValor = menor(raiz.hijoDer);
+					raiz.cliente = menorValor.cliente;
+					raiz.hora = menorValor.hora;
+					raiz.hijoDer.eliminar(menorValor.hora, menorValor.cliente);
+				}
+				else if(!this.raiz.hijoIzq.arbolVacio()){
+					NodoArbol mayorValor = mayor(raiz.hijoIzq);
+					raiz.cliente = mayorValor.cliente;
+					raiz.hora = mayorValor.hora;
+					raiz.hijoIzq.eliminar(mayorValor.hora, mayorValor.cliente);
+				}
+				else{
+					raiz = null;
+				}
+			}
+			else{
+				if(hora.compareTo(raiz.hora) < 0){
+					raiz.hijoIzq.eliminar(hora, cliente);
+				}
+				else{
+					raiz.hijoDer.eliminar(hora, cliente);
+				}
+			}
+		}
+	}
+	public String hora(){
+		return raiz.hora;
+	}
+	public String cliente(){
+		return raiz.cliente;
+	}
+	public ArbolCitasTDA hijoDerecho(){
+		return raiz.hijoDer;
+	}
+	public ArbolCitasTDA hijoIzquierdo(){
+		return raiz.hijoIzq;
+	}
+	public boolean arbolVacio(){
+		return raiz == null;
+	}
+	private NodoArbol mayor(ArbolCitasTDA arbol){
+		if(arbol.hijoDerecho().arbolVacio()){
+			NodoArbol aux = new NodoArbol();
+			aux.cliente = arbol.cliente();
+			aux.hora = arbol.hora();
+			return aux;
+	    }
+		else{
+			return mayor(arbol.hijoDerecho());
+		}
+	}
+	private NodoArbol menor(ArbolCitasTDA arbol){
+		if(arbol.hijoIzquierdo().arbolVacio()){
+			NodoArbol aux = new NodoArbol();
+			aux.cliente = arbol.cliente();
+			aux.hora = arbol.hora();
+			return aux;
+		}
+		else{
+			return menor(arbol.hijoIzquierdo());
+		}
+	}
+}
