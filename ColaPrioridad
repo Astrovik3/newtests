@@ -1,0 +1,68 @@
+public class ColaPrioridadEstatica implements ColaPrioridadTDA {
+	int cantidad;
+	String[] prioridades;
+	String[] valores;
+	public void inicializar() {
+		prioridades = new String[10000];
+		valores = new String[10000];
+		cantidad = 0;
+	}
+	public void acolar(String valor, String prioridad) {
+		int posicion = 0;
+		int semaforo = 0;
+		if(cantidad == 0){
+			prioridades[0] = prioridad;
+			valores[0] = valor;
+		}
+		else{
+			while(posicion < cantidad){
+				if(prioridad.compareTo(prioridades[posicion]) > 0){
+					semaforo = 1;
+				}
+				else if(prioridad.compareTo(prioridades[posicion]) < 0 || prioridad.compareTo(prioridades[posicion]) == 0){
+					semaforo = 2;
+					String auxiliarp = prioridades[posicion];
+					String auxiliarv = valores[posicion]; 
+					if(auxiliarp != null){
+						while(auxiliarp != null){
+							prioridades[posicion] = prioridad;
+							valores[posicion] = valor;
+							prioridad = auxiliarp;
+							valor = auxiliarv;
+							posicion++;
+							auxiliarp = prioridades[posicion];
+							auxiliarv = valores[posicion];
+						}
+					}  
+					prioridades[posicion] = prioridad;
+					valores[posicion] = valor;
+				}
+				posicion++;
+			}
+		}
+		if(semaforo == 1){
+			prioridades[cantidad] = prioridad;
+			valores[cantidad] = valor;
+		}
+		cantidad++;
+	}
+	public void dasacolar(){
+		for(int i = 0; i<cantidad; i++){
+			valores[i] = valores[i + 1];
+			prioridades[i] = prioridades[i + 1];
+		}
+		cantidad--;
+	}
+	public String primero(){
+		return valores[0];
+	}
+	public String prioridad(){
+		return prioridades[0];
+	}
+	public boolean colaVacia(){
+		if(cantidad != 0){
+			return false;
+		}
+		return true;
+	}
+}
