@@ -1,0 +1,191 @@
+import tdas.ArbolCitasTDA;
+import tdas.ColaTDA;
+import tdas.ConjuntoTDA;
+
+public class AgendaCitas implements tdas.AgendaCitasTDA{
+	private NodoAgenda raizAgenda;
+	public void inicializar(){	
+		raizAgenda = null;
+	}
+	public void agregarNuevoDia(String abogado, String dia, String fecha){
+		NodoAgenda AgendaAbogadoAbuscar = buscoAbogado(abogado); 
+		NodoDia NodoDiaAux; 						            
+		
+		if(AgendaAbogadoAbuscar == null){
+			AgendaAbogadoAbuscar = new NodoAgenda();
+			NodoDiaAux = new NodoDia();
+			ArbolCitasTDA nueTur = new ArbolCitas();
+			nueTur.inicializar();
+			AgendaAbogadoAbuscar.abogado=abogado;
+			AgendaAbogadoAbuscar.primeraFecha = NodoDiaAux;
+			AgendaAbogadoAbuscar.sigAbogado = raizAgenda;
+			raizAgenda = AgendaAbogadoAbuscar;
+			NodoDiaAux.fecha = fecha;
+			NodoDiaAux.dia = dia;
+			NodoDiaAux.siguienteFecha=null;
+			NodoDiaAux.turnos = nueTur;
+		}
+		else{
+			NodoDiaAux = buscoFecha(AgendaAbogadoAbuscar.primeraFecha,fecha); 
+			if(NodoDiaAux == null){
+				NodoDiaAux = new NodoDia();
+				ArbolCitasTDA nueTur = new ArbolCitas();
+				nueTur.inicializar();
+				NodoDiaAux.fecha = fecha;
+				NodoDiaAux.dia = dia;
+				NodoDiaAux.siguienteFecha = AgendaAbogadoAbuscar.primeraFecha;
+				AgendaAbogadoAbuscar.primeraFecha = NodoDiaAux;
+				NodoDiaAux.turnos = nueTur;
+			}
+		}
+	}
+	public void agregarNuevaCita(String abogado, String fecha, String hora, String cliente){	
+		NodoAgenda abogadoAux = buscoAbogado(abogado);
+		NodoDia NodoDiaAux = abogadoAux.primeraFecha;
+		while(NodoDiaAux != null){
+			if( NodoDiaAux.fecha == fecha){
+				NodoDiaAux.turnos.agregar(hora, cliente);
+			}
+			if(NodoDiaAux.siguienteFecha == null){
+				break;
+			}
+			NodoDiaAux = NodoDiaAux.siguienteFecha;
+		}
+	}
+	public void eliminarAbogado(String abogado){
+		if(raizAgenda!=null){
+			if(raizAgenda.abogado.equalsIgnoreCase(abogado)){ 
+				raizAgenda=raizAgenda.sigAbogado;
+			}
+			else{
+				NodoAgenda aux=raizAgenda;
+				while(aux.sigAbogado != null && !aux.sigAbogado.abogado.equalsIgnoreCase(abogado)){
+					aux=aux.sigAbogado;
+				}   
+				if(aux.sigAbogado != null){
+					aux.sigAbogado=aux.sigAbogado.sigAbogado;
+				}
+			}
+		}
+	}
+	public void eliminarFecha(String abogado, String fecha){
+		NodoAgenda aboBus = buscoAbogado(abogado); 
+		if(aboBus != null){
+			if(aboBus.primeraFecha == null){
+				eliminarAbogado(abogado);	
+			}
+			if(aboBus.primeraFecha.fecha.equalsIgnoreCase(fecha)){
+				aboBus.primeraFecha=aboBus.primeraFecha.siguienteFecha;
+				eliminarAbogado(abogado);	
+			}
+			else{
+				NodoDia aux = aboBus.primeraFecha;
+				while(aux.siguienteFecha != null && !aux.siguienteFecha.fecha.equalsIgnoreCase(fecha)){
+					aux = aux.siguienteFecha;
+				}
+				if(aux.siguienteFecha != null){
+					aux.siguienteFecha = aux.siguienteFecha.siguienteFecha;
+				}
+			}
+		}
+	}
+	public void eliminarCita(String abogado, String fecha, String hora, String cliente){
+		NodoAgenda aboBus = buscoAbogado(abogado); 
+		NodoDia diaBus; 
+		diaBus = buscoFecha(aboBus.primeraFecha, fecha);
+		diaBus.turnos.eliminar(hora, cliente);
+	}
+	public boolean existeCita(String abogado, String fecha, String hora){
+		NodoAgenda abogadoABuscar = buscoAbogado(abogado);
+		if(abogadoABuscar == null) { 
+			return false;
+		}
+		else {
+			NodoDia nodoDia ;	
+			nodoDia = buscoFecha(abogadoABuscar.primeraFecha,fecha);
+			if(nodoDia == null){ 
+				return false;
+			}
+			else{ 
+				if(buscoHora(nodoDia.turnos,hora) != null) { 
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	public String clienteEnCita(String abogado, String fecha, String hora){
+		NodoAgenda abogadoAux = buscoAbogado(abogado);
+		if(abogado != null){
+			NodoDia nododiaAux = buscoFecha(abogadoAux.primeraFecha,fecha);
+			if(nododiaAux != null){
+				ArbolCitasTDA ArbolAux = buscoHora(nododiaAux.turnos, hora);
+				if(ArbolAux != null){
+					return ArbolAux.cliente();
+				}
+			}
+			return null;
+		}
+		return null;
+	}
+	public ConjuntoTDA abogados(){
+		ConjuntoTDA resultado = new ConjuntoEstatico();
+		NodoAgenda aux = raizAgenda;
+		resultado.inicializar();
+		while(aux != null){
+			resultado.agregar(aux.abogado);
+			aux = aux.sigAbogado;
+		}
+		return resultado;
+	}
+	public ColaTDA turnos(String abogado, String fecha){
+		ColaPrioridadEstatica colap = new ColaPrioridadEstatica();
+		colap.inicializar();
+		ColaTDA resultado = new ColaEstatica();
+		resultado.inicilizar();
+		NodoDia fechaAbogado = null;
+		NodoAgenda abogado1 = buscoAbogado(abogado);
+		if(abogado1 != null){						
+			fechaAbogado = buscoFecha(abogado1.primeraFecha, fecha);
+		}
+		if(fechaAbogado != null && abogado1 != null){
+			ArbolCitasTDA arbolAbogado = fechaAbogado.turnos;
+			while(!arbolAbogado.arbolVacio()){
+				colap.acolar(arbolAbogado.cliente(), arbolAbogado.hora());
+				arbolAbogado.eliminar(arbolAbogado.hora(), arbolAbogado.cliente());
+			}
+			while(!colap.colaVacia()){
+				resultado.acolar(colap.primero());
+				colap.dasacolar();
+			}
+		}
+		return resultado;
+	}
+	public NodoDia buscoFecha(NodoDia primeraFecha, String fecha){
+		NodoDia aux = primeraFecha;
+		while(aux != null){
+			if(aux.fecha == fecha){
+				return aux;
+			}
+			aux = aux.siguienteFecha;
+		}
+		return null;
+	}
+	public NodoAgenda buscoAbogado(String abogado){
+		NodoAgenda aux = raizAgenda;
+		while(aux != null && !aux.abogado.equalsIgnoreCase(abogado)){
+			aux = aux.sigAbogado;
+		}
+		return aux;
+	}
+	public ArbolCitasTDA buscoHora(ArbolCitasTDA turnos, String hora){
+		ArbolCitasTDA turnosAux = turnos; 
+		while(!turnosAux.arbolVacio()){
+			if(hora.equalsIgnoreCase(turnosAux.hora())){
+				return turnosAux;
+			}
+			turnosAux.eliminar(turnosAux.hora(), turnosAux.cliente());
+		}
+		return null;
+	}
+}
